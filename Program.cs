@@ -10,14 +10,13 @@ namespace MySqlConnector
     {
         static void Main(string[] args)
         {
-            DB d = new DB("server", "username", "password", "dbName");
+            DB db = new DB("server", "username", "password", "dbName");
 
-            IDB dB = new LogReg(d);
+            IDB d = new LogReg(dB);
 
-            if (dB.DoRequest($"UPDATE {Tables.Users} SET {UsersFiels.Login} = \"admin\" WHERE {UsersFiels.Id} = \"1\" "))
-            {
-                var t = dB.GetDataTable($"SELECT * FROM {Tables.Users} WHERE {UsersFiels.Id} = \"1\"").Result;
-            }
+            var a = d.GetDataTable<Users>("SELECT * FROM users").Result;
+
+            Console.ReadKey();
         }
     }
 }
