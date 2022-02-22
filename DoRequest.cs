@@ -14,7 +14,7 @@ namespace MySqlConnector
             DB = dB;
         }
 
-        public async Task<DataTable> GetDataTable(string request)
+        public async Task<List<T>> GetDataTable<T>(string request)
         {
             DataTable dataTable = new DataTable();
             MySqlDataAdapter mySqlDataAdapter = new MySqlDataAdapter();
@@ -38,7 +38,28 @@ namespace MySqlConnector
             if (dataTable.Rows.Count < 1)
                 return null;
 
-            return dataTable;
+            return ConvertToList<T>(dataTable);
+        }
+
+        private List<T> ConvertToList<T>(DataTable dt)
+        {
+            var columnNames = dt.Columns.Cast<DataColumn>()
+                    .Select(c => c.ColumnName)
+                    .ToList();
+            var properties = typeof(T).GetProperties();
+            return dt.AsEnumerable().Select(row =>
+            {
+                var objT = Activator.CreateInstance<T>();
+                foreach (var pro in properties)
+                {
+                    if (columnNames.Contains(pro.Name))
+                    {
+                        System.Reflection.PropertyInfo pI = objT.GetType().GetProperty(pro.Name);
+                        pro.SetValue(objT, row[pro.Name] == DBNull.Value ? null : Convert.ChangeType(row[pro.Name], pI.PropertyType));
+                    }
+                }
+                return objT;
+            }).ToList();
         }
 
         public bool DoRequest(string request)
