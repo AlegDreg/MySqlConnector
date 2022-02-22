@@ -8,27 +8,36 @@ namespace MySqlConnector
         string Username { get; set; }
         string Password { get; set; }
         string Database { get; set; }
+        string Port { get; set; }
 
         MySqlConnection connection;
 
-        public DB(string server, string username, string password, string db)
+        public DB(string server, string username, string password, string db, string port = null)
         {
             Server = server;
             Username = username;
             Password = password;
             Database = db;
+            Port = port;
 
             Initialize();
         }
 
         private void Initialize()
         {
-            connection = new MySqlConnection(
+            string l = 
                 $"server={Server};" +
                 $"username={Username};" +
                 $"password={Password};" +
                 $"database={Database};" +
-                $"convert zero datetime=True");
+                $"convert zero datetime=True";
+
+            if(Port != null)
+            {
+                l += $";port ={Port};";
+            }
+
+            connection = new MySqlConnection(l);
         }
 
         public void OpenConnection()
